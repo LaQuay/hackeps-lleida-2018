@@ -7,7 +7,7 @@ function generateDoctorMessage(title, message) {
                 message +
            '  </div>' +
            '  <div class="mdl-card__actions mdl-card--border">' +
-           '    <a href="#" class="mdl-button mdl-js-button mdl-js-ripple-effect">Read More</a>' +
+           '    <a href="#" class="mdl-button mdl-js-button mdl-js-ripple-effect">Más información</a>' +
            '  </div>' +
            '</div>'
 }
