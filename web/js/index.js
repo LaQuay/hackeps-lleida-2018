@@ -19,15 +19,17 @@ window.onload = function() {
     Http.open("GET", url);
     Http.send();
     Http.onreadystatechange=(e)=>{
-        var myJSONResponse = JSON.parse(Http.responseText);
+        if (Http.readyState == 4 && Http.status == 200)
+        {
+            var myJSONResponse = JSON.parse(Http.responseText);
+            Object.keys(myJSONResponse).forEach(function(k){
+                console.log(k + ' - ' + myJSONResponse[k]);
 
-        Object.keys(myJSONResponse).forEach(function(k){
-            console.log(k + ' - ' + myJSONResponse[k]);
-
-            var elem = myJSONResponse[k]
-            var elementToAdd = generateDoctorMessage(elem['consulta'], elem['respuesta']);
-            var parentElement = document.getElementById("card-holder");
-            parentElement.innerHTML = elementToAdd + parentElement.innerHTML;
-        });
+                var elem = myJSONResponse[k]
+                var elementToAdd = generateDoctorMessage(elem['consulta'], elem['respuesta']);
+                var parentElement = document.getElementById("card-holder");
+                parentElement.innerHTML = elementToAdd + parentElement.innerHTML;
+            });
+        }
     }
 }
