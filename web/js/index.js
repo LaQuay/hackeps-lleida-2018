@@ -12,7 +12,8 @@ function generateDoctorMessage(title, message) {
            '</div>'
 }
 
-window.onload = function() {
+function loadDataFromApi() {
+    var parentElement = document.getElementById("card-holder");
     const Http = new XMLHttpRequest();
     const url='https://hackathons-186411.firebaseio.com/data.json';
 
@@ -21,15 +22,33 @@ window.onload = function() {
     Http.onreadystatechange=(e)=>{
         if (Http.readyState == 4 && Http.status == 200)
         {
+            parentElement.innerHTML = "";
             var myJSONResponse = JSON.parse(Http.responseText);
             Object.keys(myJSONResponse).forEach(function(k){
                 console.log(k + ' - ' + myJSONResponse[k]);
 
                 var elem = myJSONResponse[k]
                 var elementToAdd = generateDoctorMessage(elem['consulta'], elem['respuesta']);
-                var parentElement = document.getElementById("card-holder");
                 parentElement.innerHTML = elementToAdd + parentElement.innerHTML;
             });
         }
     }
+}
+
+var count = 0;
+var time_to_redo = 3000;
+var timer = window.setInterval(function(){
+    loadDataFromApi();
+
+    // if time is 30 * 1000 s
+    console.log(count);
+    if (count > 30 * 1000){
+        clearInterval(timer);
+    }
+    count += time_to_redo;
+}, time_to_redo);
+
+
+window.onload = function() {
+    loadDataFromApi();
 }
