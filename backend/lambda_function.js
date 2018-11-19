@@ -1,4 +1,3 @@
-
 /* eslint-disable  func-names */
 /* eslint quote-props: ["error", "consistent"]*/
 
@@ -13,7 +12,7 @@ const APP_ID = 'amzn1.ask.skill.90c5768a-4856-4346-b776-c894ebc0ad4f';
 const SKILL_NAME = 'Mi Medico';
 const GET_PROXIMA_VISITA = "Tu proxima visita es:";
 const HELP_REPROMPT = 'En qué puedo ayudarte?';
-const HELP_MESSAGE = 'Puedes decir cuándo es mi próxima visita o puedes decir salir...' + HELP_REPROMPT;
+const HELP_MESSAGE = 'Puedes decir cuándo es mi próxima visita, dame la descripcion de un medicamento, me he de tomar la aspirina o puedes decir salir...' + HELP_REPROMPT;
 const STOP_MESSAGE = '¡Hasta la próxima, salud!';
 const DESCRIPCION_IBUPROFENO = 'Ibuprofeno Kern Pharma está indicado en el \
     tratamiento de los síntomas de: Artritis reumatoide, artrosis y otros procesos \
@@ -36,21 +35,21 @@ const EFECTOS_IBUPROFENO = 'Los efectos adversos más frecuentes que ocurren con
 const LLAMANDO_A = "Llamando a";
 
 const data_fechasDeVisitas = [
-    'Miercoles a las 10:00',
+    'Miércoles a las 10:00',
     'Viernes a las 8:00',
     'Lunes a las 7:45',
     'Lunes a las 15:30',
 ];
 
 const data_frasesParaAnimar = [
-    '¿Que le dice un jaguar a otro? jaguar you',
-    '¡Hoy va a ser un gran dia!',
+    '¿Qué le dice un jaguar a otro? jaguar you',
+    '¡Hoy va a ser un gran día!',
     '¡Ánimo!',
     '¡Esqueeerit!',
     'Todo va a salir bien',
     'No te preocupes',
-    '¿Que hace una vampiro con un tractor? sembrar el panico.',
-    'Tu vales mucho, solo tienes que enfocar tu energia en algo positivo!',
+    '¿Que hace una vampiro con un tractor? sembrar el pánico.',
+    'Tu vales mucho, solo tienes que enfocar tu energía en algo positivo!',
 ];
 
 function postFirebase(consulta,respuesta) {
@@ -175,6 +174,29 @@ const CENTRO_MEDICO_CENTRO_MEDICO = 'CENTRO MEDICO';
 
 
 const handlers = {
+    'sketit': function () {
+        let frase = "Esqueriiiit, esqueriiiiit esqueeeeeeeerit, esquerit esquerit esquerit!";
+        this.response.speak(frase);
+        postFirebase("ESKETIIIIIIT!",frase);
+        this.emit(':responseReady');
+    },
+    'leer_resultados_pruebas': function () {
+        let frase = "Aún no tengo disponible los resultados, el laboratorio me indica que estarán el próximo martes.";
+        this.response.speak(frase);
+        postFirebase("Los resultados de la prueba:",frase);
+        this.emit(':responseReady');
+    },
+    'ambulancia_emergencia': function () {
+        let frase = "Voy a notificar a emergencias. No te preocupes, manten la calma. Ya llegamos!";
+        this.response.speak(frase);
+        postFirebase("Emergencia solicitada",frase);
+        this.emit(':responseReady');
+    },
+    'pizza': function () {
+        let frase = "La pizza más sana que puedes comer es la de Domino's Pizza.";
+        this.response.speak(frase);
+        this.emit(':responseReady');
+    },
     'dar_animos': function () {
         const listaDeAnimos = data_frasesParaAnimar;
         const index = Math.floor(Math.random() * listaDeAnimos.length);
@@ -204,7 +226,7 @@ const handlers = {
                     this.response.speak('Puedes preguntar por descripcion, posologia o efectos del medicamento.');
             }
         } else {
-            let frase = "Lo siento, con el tiempo disponible para la hackathon \
+            let frase = "Lo siento, con el tiempo disponible para la jácaton \
                 no tenemos disponible el prospecto para"+ medicamento +". Pero \
                 puedes probar con ibuprofeno.";
             this.response.speak(frase);
@@ -219,20 +241,17 @@ const handlers = {
         this.emit(':responseReady');
     },
     'SolicitarVisita': function () {
-        let slots = event.request.intent.slots;
-        if(slots.typeOfMedico) {
-            console.log(slots.typeOfMedico);
-            this.emit(":delegate", 'SolicitarVisita');
-        }
-        
-        this.response.speak('La primera cita disponible es el viernes a las 15:00');
+        let medico = this.event.request.intent.slots.typeOfMedico.value;
+        let frase = 'La primera cita disponible con un '+medico+' es el viernes a las 15:00';
+        this.response.speak(frase);
+        postFirebase("Emergencia solicitada",frase);
         this.emit(':responseReady');
     },
     'ProximaVisita': function () {
         this.emit('ObtenerProximaVisita');
     },
     'LaunchRequest': function () {
-        this.emit('ObtenerProximaVisita');
+        this.response.speak(HELP_MESSAGE);
     },
     'ObtenerProximaVisita': function () {
         const listaFechasRandom = data_fechasDeVisitas;
@@ -262,12 +281,15 @@ const handlers = {
         //let recordatorios = getFirebaseRecordatorio();
         //if (recordatorios.length == 0) this.response.speak("Aun no has introducido ningun recordario. Puedes guardar un nuevo recordatorios 'Recuerdame que me tome..'");
         
-        this.response.speak('Tienes que tomarte el ' + medicamento + ' dentro de dos horas y trece minutos.');
+        let time = "dos horas y trece minutos";
+        if (medicamento == "ibuprofeno") time = "dos horas y quince minutos";
+        else if (medicamento == "paracetamol") time = "diez horas";
+        else if (medicamento == "dexprofeno") time = "tres horas";
+        this.response.speak('Tienes que tomarte el ' + medicamento + ' dentro de ' + time);
         this.emit(':responseReady');
     },
     'medico_a_domicilio': function () {
-
-        let centro_medico = this.event.request.intent.slots.centro_medico.resolutions.resolutionsPerAuthority[0].values[0].value.id;
+        let centro_medico = this.event.request.intent.slots.centro_medico.value;
         let llamada_string = LLAMANDO_A + " tu ";
         switch(centro_medico) {
             case CENTRO_MEDICO_ESPECIALISTA:
